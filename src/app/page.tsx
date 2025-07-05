@@ -1,101 +1,175 @@
-import Image from "next/image";
+"use client";
+
+import {
+  faChartSimple,
+  faCircleCheck,
+  faCircleHalfStroke,
+  faEllipsisVertical,
+  faGear,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [isRunning, setIsRunning] = useState(false);
+  const [Timer, setTimer] = useState(1500);
+  const intervalIdRef = useRef(null);
+  const [active, setActive] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const stats = ["pomodoro", "short break", "long break"];
+  const statsTimes = [1500, 300, 900];
+  const backgroundColors = ["#CD5C5C", "#6495ED", "#5F9EA0", "#111111"];
+
+  useEffect(() => {
+    if (isRunning) {
+      intervalIdRef.current = setInterval(() => {
+        setTimer((prevTimer) => {
+          if (prevTimer <= 1) {
+            clearInterval(intervalIdRef.current);
+            setIsRunning(false);
+            return;
+          }
+
+          return prevTimer - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(intervalIdRef.current);
+    }
+
+    return () => {
+      clearInterval(intervalIdRef.current);
+    };
+  }, [isRunning]);
+
+  // useEffect(() => {
+  //   if (isDarkMode) {
+  //     setIsDarkMode(true);
+  //   } else {
+  //     setIsDarkMode(false);
+  //   }
+
+  //   return () => {
+  //     setIsDarkMode(false);
+  //   };
+  // }, [isDarkMode]);
+
+  useEffect(() => {
+    if (!isDarkMode) {
+      document.body.style.backgroundColor = backgroundColors[active];
+    } else {
+      document.body.style.backgroundColor = backgroundColors[3];
+    }
+    return () => {
+      document.body.style.backgroundColor = "";
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, isDarkMode]);
+
+  function start() {
+    setIsRunning(true);
+  }
+
+  function stop() {
+    setIsRunning(false);
+  }
+
+  function reset(para) {
+    setTimer(para);
+    setIsRunning(false);
+  }
+
+  function formatTime() {
+    const mins = String(Math.floor(Timer / 60)).padStart(2, "0");
+    const secs = String(Timer % 60).padStart(2, "0");
+    return `${mins}:${secs}`;
+  }
+
+  return (
+    <>
+      <header className="mt-3 relative p-5 flex justify-between  after:absolute after:w-1/2 after:h-0.5 after:bg-white after:bottom-0 after:left-6 w-[700px] mx-auto ">
+        <span className="font-bold text-xl">
+          <FontAwesomeIcon icon={faCircleCheck} />
+          <p className="inline-block ml-1">Pomodoro</p>
+        </span>
+        <div>
+          <button className="py-2 px-3 bg-button-bg mr-3 text-base font-medium rounded-md">
+            <FontAwesomeIcon icon={faChartSimple} className="mr-1" />
+            Report
+          </button>
+          <button className="py-2 px-3 bg-button-bg mr-3 text-base font-medium rounded-md">
+            <FontAwesomeIcon icon={faGear} className="mr-1" />
+            Setting
+          </button>
+          <button className="py-2 px-3 bg-button-bg mr-3 text-base font-medium rounded-md">
+            <FontAwesomeIcon icon={faUserPlus} className="mr-1" />
+            Sign In
+          </button>
+          <button className="py-2 px-3 bg-button-bg mr-3 text-base font-medium rounded-md">
+            <FontAwesomeIcon icon={faEllipsisVertical} />
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </header>
+
+      <div className="bg-backgroundWhite w-[470px] h-72  mx-auto dark:bg[">
+        <div className="flex justify-center mt-10 p-6" id="stats">
+          {stats.map((label, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setActive(index);
+                reset(statsTimes[index]);
+              }}
+              className={`mr-2  px-2 py-1 font-bold rounded-md
+                ${active === index ? "active" : ""} `}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="text-center">
+          <h2 className="font-extrabold text-8xl tracking-wider ">
+            {formatTime()}
+          </h2>
+        </div>
+        <div className="text-center mt-7">
+          {!isRunning ? (
+            <button
+              className="bg-white px-14 py-3 text-xl uppercase font-bold rounded-sm border-b-gray-200 border-b-8 transition text-black"
+              onClick={() => start()}
+            >
+              {Timer === statsTimes[active] ? "start" : "resume"}
+            </button>
+          ) : (
+            <>
+              <button
+                className="bg-white px-12 py-3 text-xl uppercase font-bold rounded-sm transition text-black"
+                onClick={() => stop()}
+              >
+                pause
+              </button>
+              <button
+                className="bg-white  px-12 ml-3 py-3 text-xl uppercase font-bold rounded-sm transition text-black"
+                onClick={() => reset(statsTimes[active])}
+              >
+                {" "}
+                Reset{" "}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div
+        className={`absolute cursor-pointer bg-white text-[#111222] w-8 h-8 flex items-center justify-center text-xl rounded-[50%] right-10 bottom-10 transition ${
+          isDarkMode ? "bg-[#111222] text-white" : "bg-white text-[#111222]"
+        }`}
+        onClick={() => setIsDarkMode(!isDarkMode)}
+      >
+        <FontAwesomeIcon icon={faCircleHalfStroke} className="text-4xl" />
+      </div>
+    </>
   );
 }
